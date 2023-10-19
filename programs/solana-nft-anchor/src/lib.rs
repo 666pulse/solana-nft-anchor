@@ -16,9 +16,9 @@ declare_id!("DLQQhHTBBeY7gGVwXE4vG8vCKCvJKBJZbCcKfbcQSWm9");
 
 #[program]
 pub mod solana_nft_anchor {
-
     use super::*;
 
+    // Create new token mint with PDA as mint authority
     pub fn init_nft(
         ctx: Context<InitNFT>,
         name: String,
@@ -51,6 +51,7 @@ pub mod solana_nft_anchor {
             },
         );
 
+        // On-chain token metadata for the mint
         let data_v2 = DataV2 {
             name: name,
             symbol: symbol,
@@ -61,7 +62,13 @@ pub mod solana_nft_anchor {
             uses: None,
         };
 
-        create_metadata_accounts_v3(cpi_context, data_v2, false, true, None)?;
+        create_metadata_accounts_v3(
+            cpi_context, // cpi context
+            data_v2, // token metadata
+            false,    // is_mutable
+            true,    // update_authority_is_signer
+            None,    // collection details
+        )?;
 
         //create master edition account
         let cpi_context = CpiContext::new(
@@ -90,6 +97,7 @@ pub struct InitNFT<'info> {
     /// CHECK: ok, we are passing in this account ourselves
     #[account(mut, signer)]
     pub signer: AccountInfo<'info>,
+
     #[account(
         init,
         payer = signer,
@@ -98,6 +106,7 @@ pub struct InitNFT<'info> {
         mint::freeze_authority = signer.key(),
     )]
     pub mint: Account<'info, Mint>,
+
     #[account(
         init_if_needed,
         payer = signer,
@@ -105,12 +114,14 @@ pub struct InitNFT<'info> {
         associated_token::authority = signer
     )]
     pub associated_token_account: Account<'info, TokenAccount>,
+
     /// CHECK - address
     #[account(
         mut,
         address=find_metadata_account(&mint.key()).0,
     )]
     pub metadata_account: AccountInfo<'info>,
+
     /// CHECK: address
     #[account(
         mut,
