@@ -47,7 +47,7 @@ import privateKey from "~/.config/solana/id.json";
 // export ANCHOR_WALLET=~/.config/solana/id.json
 // export ANCHOR_PROVIDER_URL="https://api.devnet.solana.com"
 
-const programId = new PublicKey("");
+const programId = new PublicKey(""); //
 
 async function main() {
   const provider = anchor.AnchorProvider.env();
