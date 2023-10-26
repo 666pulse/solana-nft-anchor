@@ -5,33 +5,42 @@ import re
 import toml
 import subprocess
 
-file = "new-keypair.json"
+keyfile = "./script/new-keypair.json"
 
-shell = ['solana-keygen', 'new', '-s','--force', '--no-bip39-passphrase', '-o', file]
+# mkdir -p ./target/deploy
+dirshell = ['mkdir', '-p', './target/deploy']
+ok = subprocess.run(dirshell, capture_output=True, text=True)
+
+# solana-keygen new -s --force --no-bip39-passphrase -o new-keypair.json
+shell = ['solana-keygen', 'new', '-s','--force', '--no-bip39-passphrase', '-o', keyfile]
 result1 = subprocess.run(shell, capture_output=True, text=True)
 print(result1.stdout)
 
-cpshell = ['cp', '-f', file, '../target/deploy/solana_nft_anchor-keypair.json']
+# cp -f ./script/new-keypair.json ./target/deploy/solana_nft_anchor-keypair.json
+cpshell = ['cp', '-f', keyfile, './target/deploy/solana_nft_anchor-keypair.json']
 subprocess.run(cpshell, capture_output=True, text=True)
+print("create new keypair file: ", "./target/deploy/solana_nft_anchor-keypair.json")
 
-solanashell = ['solana','address', '-k', file]
+# solana address -k ./script/new-keypair.json
+solanashell = ['solana', 'address', '-k', keyfile]
 result2 = subprocess.run(solanashell, capture_output=True, text=True)
 
 addr = result2.stdout.replace("\n", "")
-print("addr:", addr)
+print("ProjectId: ", addr)
 
 declare_id_regex = r"^(([\w]+::)*)declare_id!\(\"(\w*)\"\)"
 
-rsfile = "../programs/solana-nft-anchor/src/lib.rs"
+rsfile = "./programs/solana-nft-anchor/src/lib.rs"
 with open(rsfile, 'r') as file:
     libdata = file.read()
-    subst = f'declare_id!("{addr}")'
-    libresult = re.sub(declare_id_regex, subst, libdata, 0, re.MULTILINE)
 
-with open(rsfile, 'w') as output_file:
-    output_file.write(libresult)
+    change_str = f'declare_id!("{addr}")'
+    libresult = re.sub(declare_id_regex, change_str, libdata, 0, re.MULTILINE)
 
-tomlfile = "../Anchor.toml"
+with open(rsfile, 'w') as file:
+    file.write(libresult)
+
+tomlfile = "./Anchor.toml"
 with open(tomlfile, 'r') as file:
    tomldata = toml.load(file)
 
