@@ -9,7 +9,8 @@
         "@metaplex-foundation/umi": "^0.8.9",
         "@metaplex-foundation/umi-bundle-defaults": "^0.8.9",
         "@metaplex-foundation/umi-signer-wallet-adapters": "^0.8.9",
-        "@solana/spl-token": "^0.3.8"
+        "@solana/spl-token": "^0.3.8",
+        "bs58": "^5.0.0"
     },
     "devDependencies": {
         "@types/bn.js": "^5.1.0",
